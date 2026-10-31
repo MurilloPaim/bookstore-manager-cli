@@ -80,3 +80,98 @@ CREATE UNIQUE INDEX uq_emprestimo_ativo_livro_cliente
     ON emprestimos (livro_id, cliente_id)
     WHERE status = 'ATIVO';
 
+-- =====================================================================
+-- SEÇÃO 2 - MANIPULAÇÃO DE DADOS (DML)
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- 2.1 INSERT - mesmos dados iniciais de src/data/seed.ts
+-- ---------------------------------------------------------------------
+
+INSERT INTO autores (id, nome, nacionalidade) VALUES
+    (1, 'Machado de Assis', 'Brasileira'),
+    (2, 'Clarice Lispector', 'Brasileira'),
+    (3, 'Jorge Amado', 'Brasileira'),
+    (4, 'George Orwell', 'Britânica'),
+    (5, 'Agatha Christie', 'Britânica'),
+    (6, 'Cecília Meireles', 'Brasileira');
+
+INSERT INTO livros (id, titulo, isbn, ano_publicacao, autor_id, quantidade_total, quantidade_disponivel) VALUES
+    (1, 'Dom Casmurro', '9780000000001', 1899, 1, 3, 2),
+    (2, 'Memórias Póstumas de Brás Cubas', '9780000000002', 1881, 1, 2, 2),
+    (3, 'A Hora da Estrela', '9780000000003', 1977, 2, 1, 0),
+    (4, 'Capitães da Areia', '9780000000004', 1937, 3, 2, 1),
+    (5, 'Gabriela, Cravo e Canela', '9780000000005', 1958, 3, 2, 2),
+    (6, '1984', '9780000000006', 1949, 4, 4, 3),
+    (7, 'A Revolução dos Bichos', '9780000000007', 1945, 4, 3, 3),
+    (8, 'Assassinato no Expresso do Oriente', '9780000000008', 1934, 5, 2, 2);
+
+INSERT INTO clientes (id, nome, cpf, email, telefone) VALUES
+    (1, 'Ana Souza', '00000000101', 'ana.souza@exemplo.com', '47990000001'),
+    (2, 'Bruno Lima', '00000000202', 'bruno.lima@exemplo.com', '47990000002'),
+    (3, 'Carla Mendes', '00000000303', 'carla.mendes@exemplo.com', '47990000003'),
+    (4, 'Diego Rocha', '00000000404', 'diego.rocha@exemplo.com', '47990000004'),
+    (5, 'Elisa Martins', '00000000505', 'elisa.martins@exemplo.com', '47990000005');
+
+INSERT INTO emprestimos (id, livro_id, cliente_id, data_emprestimo, data_devolucao, status) VALUES
+    (1, 1, 1, '2026-09-01', '2026-09-15', 'DEVOLVIDO'),
+    (2, 3, 2, '2026-09-20', NULL, 'ATIVO'),
+    (3, 6, 1, '2026-10-01', NULL, 'ATIVO'),
+    (4, 6, 3, '2026-10-05', '2026-10-20', 'DEVOLVIDO'),
+    (5, 1, 4, '2026-10-10', NULL, 'ATIVO'),
+    (6, 4, 3, '2026-10-12', NULL, 'ATIVO');
+
+-- Os IDs acima foram informados manualmente; ajusta os próximos IDs automáticos.
+SELECT setval(pg_get_serial_sequence('autores', 'id'), (SELECT MAX(id) FROM autores));
+SELECT setval(pg_get_serial_sequence('livros', 'id'), (SELECT MAX(id) FROM livros));
+SELECT setval(pg_get_serial_sequence('clientes', 'id'), (SELECT MAX(id) FROM clientes));
+SELECT setval(pg_get_serial_sequence('emprestimos', 'id'), (SELECT MAX(id) FROM emprestimos));
+
+-- ---------------------------------------------------------------------
+-- 2.2 UPDATE e DELETE - demonstração com um cliente e um empréstimo
+--     temporários, sem alterar os dados iniciais usados nos relatórios
+-- ---------------------------------------------------------------------
+
+-- Cadastra um cliente e registra um empréstimo do livro 7.
+INSERT INTO clientes (nome, cpf, email, telefone) VALUES
+    ('Cliente Temporário', '00000000999', 'temporario@exemplo.com', '47990000999');
+
+INSERT INTO emprestimos (livro_id, cliente_id, data_emprestimo)
+SELECT 7, id, '2026-10-25' FROM clientes WHERE cpf = '00000000999';
+
+UPDATE livros
+SET quantidade_disponivel = quantidade_disponivel - 1
+WHERE id = 7;
+
+-- UPDATE: corrige o telefone do cliente.
+UPDATE clientes
+SET telefone = '47990000888'
+WHERE cpf = '00000000999';
+
+-- UPDATE: registra a devolução e devolve o exemplar ao estoque.
+UPDATE emprestimos
+SET data_devolucao = '2026-10-28', status = 'DEVOLVIDO'
+WHERE cliente_id = (SELECT id FROM clientes WHERE cpf = '00000000999')
+  AND status = 'ATIVO';
+
+UPDATE livros
+SET quantidade_disponivel = quantidade_disponivel + 1
+WHERE id = 7;
+
+-- DELETE: remove primeiro o empréstimo (tabela filha) e depois o cliente (tabela pai),
+-- respeitando a chave estrangeira.
+DELETE FROM emprestimos
+WHERE cliente_id = (SELECT id FROM clientes WHERE cpf = '00000000999');
+
+DELETE FROM clientes
+WHERE cpf = '00000000999';
+
+-- ---------------------------------------------------------------------
+-- 2.3 SELECT - conferência das tabelas
+-- ---------------------------------------------------------------------
+
+SELECT * FROM autores ORDER BY id;
+SELECT * FROM livros ORDER BY id;
+SELECT * FROM clientes ORDER BY id;
+SELECT * FROM emprestimos ORDER BY id;
+
