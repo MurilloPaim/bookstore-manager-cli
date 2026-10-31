@@ -1,11 +1,14 @@
 import { Autor } from "../models/Autor";
+import { Cliente } from "../models/Cliente";
 import { Livro } from "../models/Livro";
 import type { IAutorRepository } from "../repositories/AutorRepository";
+import type { IClienteRepository } from "../repositories/ClienteRepository";
 import type { ILivroRepository } from "../repositories/LivroRepository";
 
 export interface RepositoriosAplicacao {
   autores: IAutorRepository;
   livros: ILivroRepository;
+  clientes: IClienteRepository;
 }
 
 const autoresIniciais: Autor[] = [
@@ -28,11 +31,22 @@ const livrosIniciais: Livro[] = [
   new Livro(8, "Assassinato no Expresso do Oriente", "9780000000008", 1934, 5, 2, 2),
 ];
 
+const clientesIniciais: Cliente[] = [
+  new Cliente(1, "Ana Souza", "00000000101", "ana.souza@exemplo.com", "47990000001"),
+  new Cliente(2, "Bruno Lima", "00000000202", "bruno.lima@exemplo.com", "47990000002"),
+  new Cliente(3, "Carla Mendes", "00000000303", "carla.mendes@exemplo.com", "47990000003"),
+  new Cliente(4, "Diego Rocha", "00000000404", "diego.rocha@exemplo.com", "47990000004"),
+  new Cliente(5, "Elisa Martins", "00000000505", "elisa.martins@exemplo.com", "47990000005"),
+];
+
 export async function carregarDadosIniciais(repositorios: RepositoriosAplicacao): Promise<void> {
   for (const autor of autoresIniciais) {
     await repositorios.autores.inserir(autor);
   }
   for (const livro of livrosIniciais) {
     await repositorios.livros.inserir(livro);
+  }
+  for (const cliente of clientesIniciais) {
+    await repositorios.clientes.inserir(cliente);
   }
 }
