@@ -6,7 +6,7 @@ O repositório também traz o projeto do banco de dados em PostgreSQL: o DER e o
 
 > **Importante:** a aplicação não se conecta ao banco de dados. Ela mantém os dados em memória durante a execução, e tudo o que foi alterado se perde ao encerrar. O banco é modelado e executado separadamente, pelo `script.sql`. Os dois usam os mesmos dados de exemplo.
 
-**Vídeo de apresentação:** _(adicionar o link aqui)_
+**Vídeo de apresentação:** https://drive.google.com/file/d/1zfkIsC6td7XRumtlQKLZO4gEDHwllYew/view?usp=sharing
 
 **Kanban:** https://github.com/users/MurilloPaim/projects/2
 
