@@ -1,6 +1,7 @@
 import { createInterface } from "node:readline";
 import type { Interface } from "node:readline";
 import { EntradaEncerradaError } from "../models/erros";
+import { converterIdentificador, converterInteiro } from "./validacoes";
 
 interface LeituraPendente {
   resolver: (linha: string) => void;
@@ -28,6 +29,14 @@ export class Terminal {
   public async perguntarComPadrao(rotulo: string, valorAtual: string): Promise<string> {
     const resposta = await this.perguntar(`${rotulo} [${valorAtual}]: `);
     return resposta.trim() === "" ? valorAtual : resposta;
+  }
+
+  public async perguntarInteiro(rotulo: string): Promise<number> {
+    return converterInteiro(await this.perguntar(`${rotulo}: `), rotulo);
+  }
+
+  public async perguntarIdentificador(rotulo: string): Promise<number> {
+    return converterIdentificador(await this.perguntar(`${rotulo}: `), rotulo);
   }
 
   public fechar(): void {
