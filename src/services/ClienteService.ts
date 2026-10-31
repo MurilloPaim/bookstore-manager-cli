@@ -1,14 +1,18 @@
 import { Cliente } from "../models/Cliente";
 import type { DadosCliente } from "../models/Cliente";
-import { RegistroDuplicadoError, RegistroNaoEncontradoError } from "../models/erros";
+import { RegistroDuplicadoError, RegistroNaoEncontradoError, RegraDeNegocioError } from "../models/erros";
 import type { IClienteRepository } from "../repositories/ClienteRepository";
+import type { IEmprestimoRepository } from "../repositories/EmprestimoRepository";
 import { exigirTexto, normalizarDigitos, normalizarEmail } from "../utils/validacoes";
 
 const TAMANHO_CPF = 11;
 const TAMANHOS_TELEFONE = [10, 11];
 
 export class ClienteService {
-  constructor(private readonly clienteRepository: IClienteRepository) {}
+  constructor(
+    private readonly clienteRepository: IClienteRepository,
+    private readonly emprestimoRepository: IEmprestimoRepository,
+  ) {}
 
   public async cadastrar(dados: DadosCliente): Promise<Cliente> {
     const dadosValidos = this.validarDados(dados);
@@ -40,6 +44,12 @@ export class ClienteService {
 
   public async remover(id: number): Promise<void> {
     await this.buscarPorId(id);
+
+    const emprestimosDoCliente = await this.emprestimoRepository.listarPorCliente(id);
+    if (emprestimosDoCliente.length > 0) {
+      throw new RegraDeNegocioError(`O cliente com ID ${id} possui empréstimos registrados e não pode ser removido.`);
+    }
+
     await this.clienteRepository.remover(id);
   }
 
