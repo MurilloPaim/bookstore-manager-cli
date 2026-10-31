@@ -8,7 +8,7 @@ O repositório também traz o projeto do banco de dados em PostgreSQL: o DER e o
 
 **Vídeo de apresentação:** _(adicionar o link aqui)_
 
-**Kanban:** _(adicionar o link aqui)_
+**Kanban:** https://github.com/users/MurilloPaim/projects/2
 
 ## Objetivo
 
