@@ -32,8 +32,8 @@ async function main(): Promise<void> {
     });
 
     const autorService = new AutorService(autorRepository, livroRepository);
-    const livroService = new LivroService(livroRepository, autorRepository);
-    const clienteService = new ClienteService(clienteRepository);
+    const livroService = new LivroService(livroRepository, autorRepository, emprestimoRepository);
+    const clienteService = new ClienteService(clienteRepository, emprestimoRepository);
     const emprestimoService = new EmprestimoService(emprestimoRepository, livroRepository, clienteRepository);
 
     const menuPrincipal = criarMenuPrincipal(

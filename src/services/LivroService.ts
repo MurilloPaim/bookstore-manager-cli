@@ -2,6 +2,7 @@ import { EntradaInvalidaError, RegistroDuplicadoError, RegistroNaoEncontradoErro
 import { Livro } from "../models/Livro";
 import type { DadosLivro, LivroDetalhado } from "../models/Livro";
 import type { IAutorRepository } from "../repositories/AutorRepository";
+import type { IEmprestimoRepository } from "../repositories/EmprestimoRepository";
 import type { ILivroRepository } from "../repositories/LivroRepository";
 import { exigirTexto, normalizarDigitos, validarAnoPublicacao } from "../utils/validacoes";
 
@@ -11,6 +12,7 @@ export class LivroService {
   constructor(
     private readonly livroRepository: ILivroRepository,
     private readonly autorRepository: IAutorRepository,
+    private readonly emprestimoRepository: IEmprestimoRepository,
   ) {}
 
   public async cadastrar(dados: DadosLivro): Promise<LivroDetalhado> {
@@ -55,6 +57,12 @@ export class LivroService {
 
   public async remover(id: number): Promise<void> {
     await this.obterLivro(id);
+
+    const emprestimosDoLivro = await this.emprestimoRepository.listarPorLivro(id);
+    if (emprestimosDoLivro.length > 0) {
+      throw new RegraDeNegocioError(`O livro com ID ${id} possui empréstimos registrados e não pode ser removido.`);
+    }
+
     await this.livroRepository.remover(id);
   }
 
