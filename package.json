@@ -1,0 +1,26 @@
+{
+  "name": "bookstore-manager-cli",
+  "version": "1.0.0",
+  "description": "Sistema de gerenciamento de livraria via terminal, em Node.js e TypeScript, com projeto de banco de dados em PostgreSQL.",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "build": "tsc",
+    "start": "node dist/main.js"
+  },
+  "keywords": [
+    "nodejs",
+    "typescript",
+    "cli",
+    "postgresql",
+    "livraria"
+  ],
+  "author": "Murilo Paim",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
