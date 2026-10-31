@@ -1,11 +1,15 @@
 import { Autor } from "../models/Autor";
 import type { DadosAutor } from "../models/Autor";
-import { RegistroDuplicadoError, RegistroNaoEncontradoError } from "../models/erros";
+import { RegistroDuplicadoError, RegistroNaoEncontradoError, RegraDeNegocioError } from "../models/erros";
 import type { IAutorRepository } from "../repositories/AutorRepository";
+import type { ILivroRepository } from "../repositories/LivroRepository";
 import { exigirTexto } from "../utils/validacoes";
 
 export class AutorService {
-  constructor(private readonly autorRepository: IAutorRepository) {}
+  constructor(
+    private readonly autorRepository: IAutorRepository,
+    private readonly livroRepository: ILivroRepository,
+  ) {}
 
   public async cadastrar(dados: DadosAutor): Promise<Autor> {
     const dadosValidos = this.validarDados(dados);
@@ -37,6 +41,12 @@ export class AutorService {
 
   public async remover(id: number): Promise<void> {
     await this.buscarPorId(id);
+
+    const livrosDoAutor = await this.livroRepository.listarPorAutor(id);
+    if (livrosDoAutor.length > 0) {
+      throw new RegraDeNegocioError(`O autor com ID ${id} possui ${livrosDoAutor.length} livro(s) cadastrado(s) e não pode ser removido.`);
+    }
+
     await this.autorRepository.remover(id);
   }
 
