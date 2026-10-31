@@ -175,3 +175,66 @@ SELECT * FROM livros ORDER BY id;
 SELECT * FROM clientes ORDER BY id;
 SELECT * FROM emprestimos ORDER BY id;
 
+-- =====================================================================
+-- SEÇÃO 3 - CONSULTAS DOS RELATÓRIOS
+-- =====================================================================
+
+-- Relatório 1: livros disponíveis
+SELECT l.id, l.titulo, a.nome AS autor, l.quantidade_disponivel, l.quantidade_total
+FROM livros l
+INNER JOIN autores a ON a.id = l.autor_id
+WHERE l.quantidade_disponivel > 0
+ORDER BY l.titulo;
+
+-- Relatório 2: livros emprestados
+SELECT l.id, l.titulo, c.nome AS cliente, e.data_emprestimo
+FROM emprestimos e
+INNER JOIN livros l ON l.id = e.livro_id
+INNER JOIN clientes c ON c.id = e.cliente_id
+WHERE e.status = 'ATIVO'
+ORDER BY e.data_emprestimo, l.titulo;
+
+-- Relatório 3: livros cadastrados por autor (inclui autores sem livros)
+SELECT a.id, a.nome AS autor, COUNT(l.id) AS quantidade_livros
+FROM autores a
+LEFT JOIN livros l ON l.autor_id = a.id
+GROUP BY a.id, a.nome
+ORDER BY quantidade_livros DESC, a.nome;
+
+-- Relatório 4: quantidade de empréstimos por livro (inclui livros nunca emprestados)
+SELECT l.id, l.titulo, COUNT(e.id) AS quantidade_emprestimos
+FROM livros l
+LEFT JOIN emprestimos e ON e.livro_id = l.id
+GROUP BY l.id, l.titulo
+ORDER BY quantidade_emprestimos DESC, l.titulo;
+
+-- Relatório 5: clientes com empréstimos ativos
+SELECT c.id, c.nome AS cliente, COUNT(e.id) AS emprestimos_ativos,
+       STRING_AGG(l.titulo, ', ' ORDER BY l.titulo) AS livros
+FROM clientes c
+INNER JOIN emprestimos e ON e.cliente_id = c.id
+INNER JOIN livros l ON l.id = e.livro_id
+WHERE e.status = 'ATIVO'
+GROUP BY c.id, c.nome
+ORDER BY emprestimos_ativos DESC, c.nome;
+
+-- Relatório extra 1: os 3 livros mais emprestados
+SELECT l.titulo, COUNT(e.id) AS quantidade_emprestimos
+FROM emprestimos e
+INNER JOIN livros l ON l.id = e.livro_id
+GROUP BY l.id, l.titulo
+ORDER BY quantidade_emprestimos DESC, l.titulo
+LIMIT 3;
+
+-- Relatório extra 2: situação do acervo por autor
+SELECT a.nome AS autor,
+       SUM(l.quantidade_total) AS exemplares,
+       SUM(l.quantidade_disponivel) AS disponiveis,
+       ROUND(AVG(l.quantidade_total), 2) AS media_exemplares_por_livro,
+       MIN(l.ano_publicacao) AS primeira_publicacao,
+       MAX(l.ano_publicacao) AS ultima_publicacao
+FROM autores a
+INNER JOIN livros l ON l.autor_id = a.id
+GROUP BY a.id, a.nome
+HAVING SUM(l.quantidade_total) > 0
+ORDER BY exemplares DESC, a.nome;
