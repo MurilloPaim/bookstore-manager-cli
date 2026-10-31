@@ -1,14 +1,17 @@
 import { Autor } from "../models/Autor";
 import { Cliente } from "../models/Cliente";
+import { Emprestimo } from "../models/Emprestimo";
 import { Livro } from "../models/Livro";
 import type { IAutorRepository } from "../repositories/AutorRepository";
 import type { IClienteRepository } from "../repositories/ClienteRepository";
+import type { IEmprestimoRepository } from "../repositories/EmprestimoRepository";
 import type { ILivroRepository } from "../repositories/LivroRepository";
 
 export interface RepositoriosAplicacao {
   autores: IAutorRepository;
   livros: ILivroRepository;
   clientes: IClienteRepository;
+  emprestimos: IEmprestimoRepository;
 }
 
 const autoresIniciais: Autor[] = [
@@ -39,6 +42,19 @@ const clientesIniciais: Cliente[] = [
   new Cliente(5, "Elisa Martins", "00000000505", "elisa.martins@exemplo.com", "47990000005"),
 ];
 
+const emprestimosIniciais: Emprestimo[] = [
+  new Emprestimo(1, 1, 1, criarData("2026-09-01"), criarData("2026-09-15")),
+  new Emprestimo(2, 3, 2, criarData("2026-09-20")),
+  new Emprestimo(3, 6, 1, criarData("2026-10-01")),
+  new Emprestimo(4, 6, 3, criarData("2026-10-05"), criarData("2026-10-20")),
+  new Emprestimo(5, 1, 4, criarData("2026-10-10")),
+  new Emprestimo(6, 4, 3, criarData("2026-10-12")),
+];
+
+function criarData(dataIso: string): Date {
+  return new Date(`${dataIso}T00:00:00`);
+}
+
 export async function carregarDadosIniciais(repositorios: RepositoriosAplicacao): Promise<void> {
   for (const autor of autoresIniciais) {
     await repositorios.autores.inserir(autor);
@@ -48,5 +64,8 @@ export async function carregarDadosIniciais(repositorios: RepositoriosAplicacao)
   }
   for (const cliente of clientesIniciais) {
     await repositorios.clientes.inserir(cliente);
+  }
+  for (const emprestimo of emprestimosIniciais) {
+    await repositorios.emprestimos.inserir(emprestimo);
   }
 }
